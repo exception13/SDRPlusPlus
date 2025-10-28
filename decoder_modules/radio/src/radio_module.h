@@ -170,6 +170,21 @@ private:
         if (!_this->enabled) { style::beginDisabled(); }
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
+        
+        double offset_frequency = 0.0;
+
+        if (_this->vfo) {
+            offset_frequency = _this->vfo->getOffset();
+        } else if (core::configManager.conf["vfoOffsets"].contains(_this->name)) {
+            offset_frequency = core::configManager.conf["vfoOffsets"][_this->name];
+        }
+
+        ImGui::LeftLabel("Offset");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::InputDouble(CONCAT("##offset_frequency_", _this->name), &offset_frequency, _this->snapInterval, _this->snapInterval / 2)) {
+            _this->vfo->setOffset(offset_frequency);
+        }
+
         ImGui::BeginGroup();
 
         ImGui::Columns(4, CONCAT("RadioModeColumns##_", _this->name), false);

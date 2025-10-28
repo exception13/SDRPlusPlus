@@ -299,6 +299,15 @@ namespace sourcemenu {
 
         if (running) { style::endDisabled(); }
 
+        double center_frequency = gui::waterfall.getCenterFrequency();
+
+        ImGui::LeftLabel("Frequency");
+        ImGui::SetNextItemWidth(itemWidth - ImGui::GetCursorPosX());
+        if (ImGui::InputDouble("##_center_frequency", &center_frequency, 100000.0, 1000000.0)) {
+            gui::waterfall.setCenterFrequency(center_frequency);
+            gui::waterfall.centerFreqMoved = true;
+        }
+
         sigpath::sourceManager.showSelectedMenu();
 
         if (ImGui::Checkbox("IQ Correction##_sdrpp_iq_corr", &iqCorrection)) {

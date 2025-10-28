@@ -246,6 +246,50 @@ namespace ImGui {
         }
     }
 
+    void WaterFall::nextVFO(WaterfallVFO* selVfo) {
+        std::string next = (--vfos.end())->first;
+        std::string lowest = "";
+        double lowestOffset = INFINITY;
+        double firstVfoOffset = selVfo->generalOffset;
+        double smallestDistance = INFINITY;
+        bool found = false;
+        for (auto& [_name, _vfo] : vfos) {
+            if (_vfo->generalOffset > firstVfoOffset && (_vfo->generalOffset - firstVfoOffset) < smallestDistance) {
+                next = _name;
+                smallestDistance = (_vfo->generalOffset - firstVfoOffset);
+                found = true;
+            }
+            if (_vfo->generalOffset < lowestOffset) {
+                lowestOffset = _vfo->generalOffset;
+                lowest = _name;
+            }
+        }
+        selectedVFO = found ? next : lowest;
+        selectedVFOChanged = true;
+    }
+
+    void WaterFall::prevVFO(WaterfallVFO* selVfo) {
+        std::string next = (--vfos.end())->first;
+        std::string highest = "";
+        double highestOffset = -INFINITY;
+        double firstVfoOffset = selVfo->generalOffset;
+        double smallestDistance = INFINITY;
+        bool found = false;
+        for (auto& [_name, _vfo] : vfos) {
+            if (_vfo->generalOffset < firstVfoOffset && (firstVfoOffset - _vfo->generalOffset) < smallestDistance) {
+                next = _name;
+                smallestDistance = (firstVfoOffset - _vfo->generalOffset);
+                found = true;
+            }
+            if (_vfo->generalOffset > highestOffset) {
+                highestOffset = _vfo->generalOffset;
+                highest = _name;
+            }
+        }
+        selectedVFO = found ? next : highest;
+        selectedVFOChanged = true;
+    }
+
     void WaterFall::processInputs() {
         // Pre calculate useful values
         WaterfallVFO* selVfo = NULL;
@@ -510,48 +554,12 @@ namespace ImGui {
 
         // Handle Page Up to cycle through VFOs
         if (ImGui::IsKeyPressed(ImGuiKey_PageUp) && selVfo != NULL) {
-            std::string next = (--vfos.end())->first;
-            std::string lowest = "";
-            double lowestOffset = INFINITY;
-            double firstVfoOffset = selVfo->generalOffset;
-            double smallestDistance = INFINITY;
-            bool found = false;
-            for (auto& [_name, _vfo] : vfos) {
-                if (_vfo->generalOffset > firstVfoOffset && (_vfo->generalOffset - firstVfoOffset) < smallestDistance) {
-                    next = _name;
-                    smallestDistance = (_vfo->generalOffset - firstVfoOffset);
-                    found = true;
-                }
-                if (_vfo->generalOffset < lowestOffset) {
-                    lowestOffset = _vfo->generalOffset;
-                    lowest = _name;
-                }
-            }
-            selectedVFO = found ? next : lowest;
-            selectedVFOChanged = true;
+            nextVFO(selVfo);
         }
 
         // Handle Page Down to cycle through VFOs
         if (ImGui::IsKeyPressed(ImGuiKey_PageDown) && selVfo != NULL) {
-            std::string next = (--vfos.end())->first;
-            std::string highest = "";
-            double highestOffset = -INFINITY;
-            double firstVfoOffset = selVfo->generalOffset;
-            double smallestDistance = INFINITY;
-            bool found = false;
-            for (auto& [_name, _vfo] : vfos) {
-                if (_vfo->generalOffset < firstVfoOffset && (firstVfoOffset - _vfo->generalOffset) < smallestDistance) {
-                    next = _name;
-                    smallestDistance = (firstVfoOffset - _vfo->generalOffset);
-                    found = true;
-                }
-                if (_vfo->generalOffset > highestOffset) {
-                    highestOffset = _vfo->generalOffset;
-                    highest = _name;
-                }
-            }
-            selectedVFO = found ? next : highest;
-            selectedVFOChanged = true;
+            prevVFO(selVfo);
         }
     }
 
@@ -813,7 +821,7 @@ namespace ImGui {
         widgetPos = ImGui::GetWindowContentRegionMin();
         widgetEndPos = ImGui::GetWindowContentRegionMax();
         widgetPos.x += window->Pos.x;
-        widgetPos.y += window->Pos.y;
+        widgetPos.y += window->Pos.y + 20;
         widgetEndPos.x += window->Pos.x - 4; // Padding
         widgetEndPos.y += window->Pos.y;
         widgetSize = ImVec2(widgetEndPos.x - widgetPos.x, widgetEndPos.y - widgetPos.y);
@@ -830,6 +838,22 @@ namespace ImGui {
             lastWidgetSize = widgetSize;
             onResize();
         }
+
+        WaterfallVFO* selVfo = NULL;
+        if (selectedVFO != "") {
+            selVfo = vfos[selectedVFO];
+        }
+
+        if (ImGui::SmallButton("<") && selVfo) {
+            prevVFO(selVfo);
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton(">") && selVfo) {
+            nextVFO(selVfo);
+        }
+        ImGui::SameLine();
+        ImGui::TextUnformatted(selectedVFO.c_str());
+        ImGui::Spacing();
 
         //window->DrawList->AddRectFilled(widgetPos, widgetEndPos, IM_COL32( 0, 0, 0, 255 ));
         ImU32 bg = ImGui::ColorConvertFloat4ToU32(gui::themeManager.waterfallBg);
