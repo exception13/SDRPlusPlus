@@ -198,9 +198,9 @@ void FrequencySelect::draw() {
         digitHovered = hovered;
 
         if (isInArea(mousePos, digitTopMins[0], digitBottomMaxs[11])) {
-            bool shortcutKey = io.ConfigMacOSXBehaviors ? (io.KeyMods == ImGuiKey_ModSuper) : (io.KeyMods == ImGuiKey_ModCtrl);
-            bool ctrlOnly = (io.KeyMods == ImGuiKey_ModCtrl);
-            bool shiftOnly = (io.KeyMods == ImGuiKey_ModShift);
+            bool shortcutKey = io.ConfigMacOSXBehaviors ? (io.KeyMods == ImGuiMod_Super) : (io.KeyMods == ImGuiMod_Ctrl);
+            bool ctrlOnly = (io.KeyMods == ImGuiMod_Ctrl);
+            bool shiftOnly = (io.KeyMods == ImGuiMod_Shift);
             bool copy  = ((shortcutKey && ImGui::IsKeyPressed(ImGuiKey_C)) || (ctrlOnly  && ImGui::IsKeyPressed(ImGuiKey_Insert)));
             bool paste = ((shortcutKey && ImGui::IsKeyPressed(ImGuiKey_V)) || (shiftOnly && ImGui::IsKeyPressed(ImGuiKey_Insert)));
             if (copy) {
